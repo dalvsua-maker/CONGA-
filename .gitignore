@@ -1,2 +1,5 @@
 .env
 vendor/
+
+# Documentos privados (no se publican)
+docs/private/
