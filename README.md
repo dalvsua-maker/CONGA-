@@ -66,7 +66,7 @@ En `docs/`:
 - `requisitos.md`: qué debe hacer el juego (fase 1).
 - `disenyo.md`: estructura, pantallas, datos y despliegue (fases 2 y 5).
 - `contrato.md`: el contrato entre el JS y el PHP (fase 2).
-- `pruebas.md` y `pruebas.html`: plan de pruebas y checklist clicable (fase 4).
+- `pruebas.md`: plan de pruebas (fase 4).
 
 ## Seguridad
 
