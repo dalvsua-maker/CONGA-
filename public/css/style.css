@@ -1,0 +1,168 @@
+:root {
+  --fondo: #14001f;
+  --panel: #230038;
+  --rosa: #ff2fb3;
+  --cian: #25f4ee;
+  --amarillo: #ffe14d;
+  --texto: #f5ecff;
+  --error: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #3a0a5c, var(--fondo) 60%);
+  color: var(--texto);
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.pantalla {
+  width: 100%;
+  max-width: 640px;
+  text-align: center;
+  background: var(--panel);
+  border: 2px solid var(--rosa);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 0 24px rgba(255, 47, 179, 0.5);
+}
+
+.pantalla[hidden] {
+  display: none;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 2.6rem;
+  color: var(--amarillo);
+  text-shadow: 0 0 12px var(--rosa);
+}
+
+h2 {
+  color: var(--rosa);
+  font-size: 2.2rem;
+  margin-top: 0;
+}
+
+h3 {
+  color: var(--cian);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+input {
+  width: 100%;
+  max-width: 280px;
+  padding: 0.6rem 0.8rem;
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--texto);
+  background: var(--fondo);
+  border: 2px solid var(--cian);
+  border-radius: 8px;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 10px var(--cian);
+}
+
+button {
+  padding: 0.7rem 1.4rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--fondo);
+  background: var(--amarillo);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--cian);
+}
+
+.botones {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.error {
+  color: var(--error);
+  margin: 0;
+}
+.marcador {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+  color: var(--cian);  
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+#tablero {
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
+  background: #0b0014;
+  border: 3px solid var(--cian);
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(37, 244, 238, 0.5);
+}
+
+.ayuda {
+  color: #b9a4d0;
+  font-size: 0.95rem;
+}
+
+#lista-ranking {
+  max-width: 320px;
+  margin: 0.5rem auto;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+#lista-ranking li {
+  padding: 0.2rem 0;
+}
+
+#lista-ranking li.propio {
+  color: var(--amarillo);
+  font-weight: bold;
+}
+.icono {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+}
+.aviso-record {
+  margin: 0.4rem 0;
+  color: var(--amarillo);
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--rosa);
+}
+
+#aviso-record {
+  min-height: 1.6rem;
+}

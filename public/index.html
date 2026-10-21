@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONGA!</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <!-- Pantalla de inicio -->
+        <section id="pantalla-inicio" class="pantalla">
+<h1><img src="img/bola-discoteca.svg" alt="" class="icono"> CONGA! <img src="img/bola-discoteca.svg" alt="" class="icono"></h1>
+      <form id="form-nombre" novalidate>
+        <label for="input-nombre">Tu nombre</label>
+        <input id="input-nombre" type="text" maxlength="15" autocomplete="off">
+        <p id="error-nombre" class="error" hidden></p>
+        <p>Tu récord: <strong id="record-inicio">0</strong></p>
+        <button type="submit">¡A bailar!</button>
+      </form>
+    </section>
+    <!-- Pantalla de juego -->
+        <section id="pantalla-juego" class="pantalla" hidden>
+          <header class="marcador">
+        <span>Jugador: <strong id="jugador-juego"></strong></span>
+        <span>Récord: <strong id="record-juego">–</strong></span>
+        <span>Tiempo: <strong id="tiempo">0:00</strong></span>
+        <span>Puntos: <strong id="puntos">0</strong></span>
+      </header>
+      <p id="aviso-record" class="aviso-record"></p>
+      <canvas id="tablero" width="600" height="600"></canvas>
+       <p class="ayuda">Usa las flechas o WASD para dirigir la conga</p>
+    </section>
+    <!-- Pantalla de Game Over -->
+        <section id="pantalla-gameover" class="pantalla" hidden>
+      <h2>GAME OVER</h2>
+      <p>Esta partida: <strong id="puntos-final">0</strong></p>
+      <p>Tu récord: <strong id="record-final">–</strong></p>
+            <p>Tiempo: <strong id="tiempo-final">0:00</strong></p>
+      <p id="mensaje-record" class="aviso-record"></p>
+      <p id="aviso-guardado" class="error" hidden></p>
+
+      <h3>TOP 10</h3>
+      <ol id="lista-ranking"></ol>
+      <p id="aviso-ranking" class="error" hidden></p>
+
+      <div class="botones">
+        <button id="btn-otra-vez" type="button">Otra vez</button>
+        <button id="btn-cambiar-nombre" type="button">Cambiar nombre</button>
+      </div>
+    </section>
+      </main>
+
+  <script src="js/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/game.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>

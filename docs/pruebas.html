@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONGA! · Plan de pruebas</title>
+<style>
+:root { --fondo:#ffffff; --texto:#1c1c22; --suave:#5d5d6b; --linea:#dcdce4; --acento:#c2188a; --codigo:#f2f2f7; }
+@media (prefers-color-scheme: dark) {
+  :root { --fondo:#14001f; --texto:#f5ecff; --suave:#b9a4d0; --linea:#3a1d52; --acento:#ff2fb3; --codigo:#230038; }
+}
+body { margin:0; background:var(--fondo); color:var(--texto); font:16px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:1rem 1rem 4rem; }
+h1 { margin-bottom:.2rem; }
+h2 { margin-top:2rem; border-bottom:1px solid var(--linea); padding-bottom:.3rem; }
+.progreso { position:sticky; top:0; background:var(--fondo); padding:.6rem 0; border-bottom:1px solid var(--linea); font-weight:bold; }
+.casos { list-style:none; padding:0; margin:0; }
+.casos li { border-bottom:1px solid var(--linea); }
+.casos label { display:flex; gap:.8rem; padding:.7rem .2rem; cursor:pointer; align-items:flex-start; }
+.casos input { width:1.2rem; height:1.2rem; margin-top:.2rem; flex:none; accent-color:var(--acento); }
+.casos input:checked + .txt { opacity:.55; }
+.txt em { color:var(--suave); margin-left:.5rem; font-style:normal; }
+.pasos, .esp { display:block; }
+.esp { color:var(--suave); }
+code { background:var(--codigo); padding:.05rem .3rem; border-radius:4px; }
+pre { background:var(--codigo); padding:1rem; border-radius:8px; overflow-x:auto; }
+pre code { padding:0; }
+button { margin-top:1.5rem; padding:.5rem 1rem; }
+</style>
+</head>
+<body>
+<main>
+<h1>CONGA! — Fase 4: Plan de pruebas</h1>
+<div class="progreso" id="progreso">0 de 0 casos correctos</div>
+<p>Marca cada caso cuando salga bien. Las marcas se guardan en este navegador. Si un caso falla, anota qué pasó junto con su ID.</p>
+<h2>Juego</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-01"><span class="txt"><strong>P-01</strong> <em>RF-01</em><span class="pasos">Pulsar flechas y W, A, S, D</span><span class="esp"><b>Esperado:</b> La conga gira en las 4 direcciones con ambos controles</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-02"><span class="txt"><strong>P-02</strong> <em>RF-02</em><span class="pasos">Yendo a la derecha, pulsar izquierda. Después, yendo a la derecha, pulsar arriba e izquierda muy rápido</span><span class="esp"><b>Esperado:</b> No hay giro de 180° ni choque inmediato</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-03"><span class="txt"><strong>P-03</strong> <em>RF-02</em><span class="pasos">Al empezar, pulsar izquierda</span><span class="esp"><b>Esperado:</b> La partida no arranca</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-04"><span class="txt"><strong>P-04</strong> <em>RF-03</em><span class="pasos">Comer una bola</span><span class="esp"><b>Esperado:</b> La fila crece 1, suma 10 y la nueva bola nunca aparece sobre la conga</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-05"><span class="txt"><strong>P-05</strong> <em>RF-04</em><span class="pasos">Chocar contra cada uno de los 4 bordes</span><span class="esp"><b>Esperado:</b> Game over en los 4 casos</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-06"><span class="txt"><strong>P-06</strong> <em>RF-04</em><span class="pasos">Enroscarse hasta chocar con la propia fila</span><span class="esp"><b>Esperado:</b> Game over</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-07"><span class="txt"><strong>P-07</strong> <em>RF-04</em><span class="pasos">Seguir a la propia cola de cerca sin tocarla</span><span class="esp"><b>Esperado:</b> No hay choque</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-08"><span class="txt"><strong>P-08</strong> <em>—</em><span class="pasos">Jugar con las flechas</span><span class="esp"><b>Esperado:</b> La página no hace scroll</span></span></label></li>
+</ul>
+<h2>Usuario</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-09"><span class="txt"><strong>P-09</strong> <em>RF-05</em><span class="pasos">Jugar con un nombre y recargar la página</span><span class="esp"><b>Esperado:</b> El nombre aparece ya escrito</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-10"><span class="txt"><strong>P-10</strong> <em>RF-06</em><span class="pasos">Probar <code>ab</code>, 16 caracteres, <code>Dani!</code> y vacío</span><span class="esp"><b>Esperado:</b> Mensaje de error y no empieza la partida</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-11"><span class="txt"><strong>P-11</strong> <em>RF-06</em><span class="pasos">Probar <code>José Luis</code>, <code>Ñandú 7</code>, <code>abc</code> y 15 caracteres</span><span class="esp"><b>Esperado:</b> Se aceptan</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-12"><span class="txt"><strong>P-12</strong> <em>RF-07</em><span class="pasos">Jugar como <code>Ana</code> y como <code>ana</code></span><span class="esp"><b>Esperado:</b> Mismo jugador: récord compartido y una sola entrada en el ranking</span></span></label></li>
+</ul>
+<h2>Puntuaciones</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-13"><span class="txt"><strong>P-13</strong> <em>RF-08, RF-18</em><span class="pasos">Jugar y morir; mirar <code>scores</code> en Atlas</span><span class="esp"><b>Esperado:</b> Documento nuevo con <code>name</code>, <code>nameKey</code>, <code>score</code>, <code>createdAt</code> y <code>duration</code>, sin campos de más</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-14"><span class="txt"><strong>P-14</strong> <em>RF-09</em><span class="pasos">Ver "Pruebas por consola"</span><span class="esp"><b>Esperado:</b> <code>PUNTUACION_INVALIDA</code> con -1, <code>'50'</code>, 50.5 y 99999</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-15"><span class="txt"><strong>P-15</strong> <em>RF-10</em><span class="pasos">Con más de 10 jugadores, mirar game over</span><span class="esp"><b>Esperado:</b> Solo 10, ordenados, sin repetir jugador</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-16"><span class="txt"><strong>P-16</strong> <em>RF-11, RF-12</em><span class="pasos">Comparar el récord de game over con Atlas</span><span class="esp"><b>Esperado:</b> Coincide con la mejor puntuación del jugador</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-17"><span class="txt"><strong>P-17</strong> <em>RF-13</em><span class="pasos">Mirar inicio, juego y game over</span><span class="esp"><b>Esperado:</b> Récord visible en las tres pantallas y puntos en juego</span></span></label></li>
+</ul>
+<h2>Pantallas y ampliaciones</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-18"><span class="txt"><strong>P-18</strong> <em>RF-14</em><span class="pasos">Inicio → juego → game over → "Otra vez" y "Cambiar nombre"</span><span class="esp"><b>Esperado:</b> Todas las transiciones funcionan</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-19"><span class="txt"><strong>P-19</strong> <em>RF-15</em><span class="pasos">Superar un récord mayor que 0; repetir con un jugador nuevo</span><span class="esp"><b>Esperado:</b> Aparece "¡Nuevo récord!" y, en game over, "¡Has superado tu récord!"; con jugador nuevo no aparece ningún aviso</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-20"><span class="txt"><strong>P-20</strong> <em>RF-16</em><span class="pasos">Superar el récord</span><span class="esp"><b>Esperado:</b> El récord de la cabecera sube con la puntuación</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-21"><span class="txt"><strong>P-21</strong> <em>RF-17</em><span class="pasos">Jugar más de un minuto</span><span class="esp"><b>Esperado:</b> El cronómetro arranca con la primera flecha, para al morir y muestra <code>m:ss</code></span></span></label></li>
+<li><label><input type="checkbox" data-id="P-22"><span class="txt"><strong>P-22</strong> <em>RF-18</em><span class="pasos">Comparar el cronómetro con <code>duration</code> en Atlas</span><span class="esp"><b>Esperado:</b> Coinciden; sin <code>duration</code> el servidor devuelve <code>DURACION_INVALIDA</code></span></span></label></li>
+</ul>
+<h2>No funcionales</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-23"><span class="txt"><strong>P-23</strong> <em>RNF-02</em><span class="pasos">Abrir <code>/.env</code>, <code>/composer.json</code> y <code>/src/config.php</code> en el navegador; revisar el código fuente y la pestaña Network</span><span class="esp"><b>Esperado:</b> 404 en los tres; las credenciales no aparecen en ningún sitio</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-24"><span class="txt"><strong>P-24</strong> <em>RNF-03</em><span class="pasos">Repetir P-01, P-18 y P-21 en Chrome y en Firefox</span><span class="esp"><b>Esperado:</b> Mismo resultado en ambos</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-25"><span class="txt"><strong>P-25</strong> <em>RNF-04</em><span class="pasos">F12 → Network → Offline y morir</span><span class="esp"><b>Esperado:</b> Game over con avisos de que no se pudo guardar ni cargar el ranking; los botones siguen funcionando</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-26"><span class="txt"><strong>P-26</strong> <em>RNF-04</em><span class="pasos">Con la URI de <code>.env</code> rota a propósito, reiniciar Docker y jugar</span><span class="esp"><b>Esperado:</b> El juego funciona y el servidor responde <code>BD_NO_DISPONIBLE</code> (503). Restaurar el <code>.env</code> después</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-27"><span class="txt"><strong>P-27</strong> <em>RNF-04</em><span class="pasos">Offline en la pantalla de inicio</span><span class="esp"><b>Esperado:</b> El récord muestra <code>–</code></span></span></label></li>
+</ul>
+<h2>Contrato de la API</h2>
+<ul class="casos">
+<li><label><input type="checkbox" data-id="P-28"><span class="txt"><strong>P-28</strong> <em>Contrato</em><span class="pasos">Abrir <code>/api/guardar_puntuacion.php</code> en el navegador (GET)</span><span class="esp"><b>Esperado:</b> 405 <code>METODO_NO_PERMITIDO</code></span></span></label></li>
+<li><label><input type="checkbox" data-id="P-29"><span class="txt"><strong>P-29</strong> <em>Contrato</em><span class="pasos">Ver "Pruebas por consola" (cuerpos raros)</span><span class="esp"><b>Esperado:</b> <code>NOMBRE_INVALIDO</code> con un objeto <code>{"$ne": ""}</code> y con texto que no es JSON</span></span></label></li>
+<li><label><input type="checkbox" data-id="P-30"><span class="txt"><strong>P-30</strong> <em>Contrato</em><span class="pasos">Abrir <code>/api/maximo.php?name[]=x</code> y <code>/api/maximo.php</code></span><span class="esp"><b>Esperado:</b> 400 <code>NOMBRE_INVALIDO</code></span></span></label></li>
+</ul>
+<h2>Pruebas por consola</h2>
+<p>Pegar primero en la consola (F12) la función de ayuda:</p>
+<pre><code>const probar = (c) =&gt; fetch(&#x27;/api/guardar_puntuacion.php&#x27;, {
+  method: &#x27;POST&#x27;,
+  headers: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;},
+  body: typeof c === &#x27;string&#x27; ? c : JSON.stringify(c)
+}).then(r =&gt; r.json()).then(console.log);</code></pre>
+<p>Y después, cada una por separado (ninguna guarda nada, todas deben ser rechazadas):</p>
+<pre><code>probar({name: &#x27;dani&#x27;, score: -1, duration: 10})        // PUNTUACION_INVALIDA
+probar({name: &#x27;dani&#x27;, score: &#x27;50&#x27;, duration: 10})      // PUNTUACION_INVALIDA
+probar({name: &#x27;dani&#x27;, score: 50.5, duration: 10})      // PUNTUACION_INVALIDA
+probar({name: &#x27;dani&#x27;, score: 99999, duration: 10})     // PUNTUACION_INVALIDA
+probar({name: &#x27;dani&#x27;, score: 10})                      // DURACION_INVALIDA
+probar({name: {$ne: &#x27;&#x27;}, score: 10, duration: 5})      // NOMBRE_INVALIDO
+probar(&#x27;esto no es json&#x27;)                              // NOMBRE_INVALIDO</code></pre>
+<h2>Resultado final</h2>
+<button id="limpiar" type="button">Borrar todas las marcas</button>
+</main>
+<script>
+const CLAVE = 'conga_pruebas';
+const casillas = document.querySelectorAll('input[data-id]');
+const progreso = document.getElementById('progreso');
+
+function leer() {
+  try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch { return {}; }
+}
+function guardar(estado) {
+  try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch {}
+}
+function actualizar() {
+  const hechas = [...casillas].filter(c => c.checked).length;
+  progreso.textContent = hechas + ' de ' + casillas.length + ' casos correctos';
+}
+
+const estado = leer();
+casillas.forEach(c => {
+  c.checked = !!estado[c.dataset.id];
+  c.addEventListener('change', () => {
+    estado[c.dataset.id] = c.checked;
+    guardar(estado);
+    actualizar();
+  });
+});
+document.getElementById('limpiar').addEventListener('click', () => {
+  casillas.forEach(c => { c.checked = false; delete estado[c.dataset.id]; });
+  guardar(estado);
+  actualizar();
+});
+actualizar();
+</script>
+</body>
+</html>
