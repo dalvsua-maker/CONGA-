@@ -1,4 +1,6 @@
-// Elementos del DOM
+/** Controla las pantallas y conecta el juego (game.js) con el servidor (api.js) */
+
+/* Elementos del DOM */
 const pantallas = document.querySelectorAll('.pantalla');
 const formNombre = document.getElementById('form-nombre');
 const inputNombre = document.getElementById('input-nombre');
@@ -18,22 +20,40 @@ const avisoRecord = document.getElementById('aviso-record');
 const tiempoFinal = document.getElementById('tiempo-final');
 const mensajeRecord = document.getElementById('mensaje-record');
 
+/* Estado de la partida; recordPrevio es null hasta que llega el récord del servidor */
 let recordPrevio = null;
 let recordSuperado = false;
 let nombreActual = '';
-// Muestra la pantalla indicada y oculta las demás
+
+/**
+ * Muestra una pantalla y oculta las demás.
+ *
+ * @param {string} id Id de la pantalla.
+ */
 function mostrarPantalla(id) {
   pantallas.forEach((pantalla) => {
     pantalla.hidden = pantalla.id !== id;
   });
 }
 
+/**
+ * Comprueba el nombre con la misma regla que Validador.php (solo avisa rápido,
+ * la validación que cuenta es la del servidor).
+ *
+ * @param {string} texto
+ * @returns {string|null} El nombre limpio, o null si no vale.
+ */
 function validarNombre(texto) {
   const nombre = texto.trim();
   const valido = /^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ ]{3,15}$/.test(nombre);
   return valido ? nombre : null;
 }
-// Carga el record del jugador al iniciar la pantalla de inicio
+
+/**
+ * Rellena el récord de la pantalla de inicio.
+ *
+ * @param {string|null} nombre
+ */
 async function cargarRecordInicio(nombre) {
   if (!nombre) {
     recordInicio.textContent = '0';
@@ -47,13 +67,20 @@ async function cargarRecordInicio(nombre) {
     recordInicio.textContent = '–';
   }
 }
-// Inicia la partida
+
+/**
+ * Pasa segundos a formato m:ss.
+ *
+ * @param {number} segundos
+ * @returns {string}
+ */
 function formatearTiempo(segundos) {
   const minutos = Math.floor(segundos / 60);
   const resto = String(segundos % 60).padStart(2, '0');
   return `${minutos}:${resto}`;
 }
 
+/** Pide el récord al empezar para poder avisar cuando se supere */
 async function cargarRecordJuego() {
   try {
     recordPrevio = await obtenerMaximo(nombreActual);
@@ -63,6 +90,7 @@ async function cargarRecordJuego() {
   }
 }
 
+/** Deja la pantalla de juego a cero y arranca una partida nueva */
 function empezarPartida() {
   jugadorJuego.textContent = nombreActual;
   puntosJuego.textContent = '0';
@@ -76,6 +104,13 @@ function empezarPartida() {
   juego.iniciar();
   cargarRecordJuego();
 }
+
+/**
+ * La llama Juego al comer una bola. Actualiza el marcador y avisa si se supera
+ * el récord (en la primera partida no se avisa).
+ *
+ * @param {number} puntos
+ */
 function alCambiarPuntos(puntos) {
   puntosJuego.textContent = puntos;
 
@@ -89,6 +124,7 @@ function alCambiarPuntos(puntos) {
   }
 }
 
+/** Al enviar el nombre: lo valida, lo guarda y empieza la partida */
 formNombre.addEventListener('submit', (evento) => {
   evento.preventDefault();
 
@@ -105,7 +141,14 @@ formNombre.addEventListener('submit', (evento) => {
   guardarNombre(nombre);
   empezarPartida();
 });
-// Cargar el ranking y mostrarlo en la pantalla de Game Over
+
+/**
+ * La llama Juego al terminar. Guarda la puntuación y después carga el ranking
+ * y el récord, para que ya incluyan esta partida.
+ *
+ * @param {number} puntos
+ * @param {number} segundos
+ */
 async function alTerminar(puntos, segundos) {
   puntosFinal.textContent = puntos;
   tiempoFinal.textContent = formatearTiempo(segundos);
@@ -117,7 +160,7 @@ async function alTerminar(puntos, segundos) {
   mostrarPantalla('pantalla-gameover');
 
   try {
-      await guardarPuntuacion(nombreActual, puntos, segundos);
+    await guardarPuntuacion(nombreActual, puntos, segundos);
     if (recordSuperado) {
       mensajeRecord.textContent = '¡Has superado tu récord!';
     }
@@ -129,6 +172,8 @@ async function alTerminar(puntos, segundos) {
   cargarRanking();
   cargarRecordFinal();
 }
+
+/** Pide el top 10 y lo pinta; si falla, enseña un aviso */
 async function cargarRanking() {
   try {
     const ranking = await obtenerRanking();
@@ -139,6 +184,11 @@ async function cargarRanking() {
   }
 }
 
+/**
+ * Dibuja el ranking en la lista y resalta la fila del jugador actual.
+ *
+ * @param {Array<{name: string, score: number}>} ranking
+ */
 function pintarRanking(ranking) {
   listaRanking.replaceChildren();
 
@@ -153,6 +203,7 @@ function pintarRanking(ranking) {
   });
 }
 
+/** Rellena el récord de la pantalla de game over */
 async function cargarRecordFinal() {
   try {
     recordFinal.textContent = await obtenerMaximo(nombreActual);
@@ -160,7 +211,8 @@ async function cargarRecordFinal() {
     recordFinal.textContent = '–';
   }
 }
-// Eventos de los botones
+
+/* Botones */
 document.getElementById('btn-otra-vez').addEventListener('click', empezarPartida);
 
 document.getElementById('btn-cambiar-nombre').addEventListener('click', () => {
@@ -173,6 +225,7 @@ inputNombre.addEventListener('change', () => {
   cargarRecordInicio(validarNombre(inputNombre.value));
 });
 
+/* Arranque */
 const juego = new Juego(
   tablero,
   alCambiarPuntos,

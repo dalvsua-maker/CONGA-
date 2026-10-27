@@ -1,8 +1,15 @@
 <?php
 
+/**
+ * GET api/ranking.php
+ * Devuelve el top 10 con una fila por jugador (su mejor partida).
+ */
+
 require_once __DIR__ . '/../../src/Database.php';
 require_once __DIR__ . '/../../src/Respuesta.php';
 
+/* Se ordena, se agrupa por jugador, se vuelve a ordenar (al agrupar se pierde
+   el orden) y se corta en 10 */
 $pipeline = [
     ['$sort' => ['score' => -1, 'createdAt' => 1]],
     ['$group' => [

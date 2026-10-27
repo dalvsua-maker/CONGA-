@@ -7,10 +7,12 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Las tres pantallas están en la misma página; main.js enseña una y oculta las otras -->
   <main>
-    <!-- Pantalla de inicio -->
-        <section id="pantalla-inicio" class="pantalla">
-<h1><img src="img/bola-discoteca.svg" alt="" class="icono"> CONGA! <img src="img/bola-discoteca.svg" alt="" class="icono"></h1>
+
+    <!-- Pantalla de inicio: nombre y récord -->
+    <section id="pantalla-inicio" class="pantalla">
+      <h1><img src="img/bola-discoteca.svg" alt="" class="icono"> CONGA! <img src="img/bola-discoteca.svg" alt="" class="icono"></h1>
       <form id="form-nombre" novalidate>
         <label for="input-nombre">Tu nombre</label>
         <input id="input-nombre" type="text" maxlength="15" autocomplete="off">
@@ -19,9 +21,10 @@
         <button type="submit">¡A bailar!</button>
       </form>
     </section>
-    <!-- Pantalla de juego -->
-        <section id="pantalla-juego" class="pantalla" hidden>
-          <header class="marcador">
+
+    <!-- Pantalla de juego: marcador y tablero -->
+    <section id="pantalla-juego" class="pantalla" hidden>
+      <header class="marcador">
         <span>Jugador: <strong id="jugador-juego"></strong></span>
         <span>Récord: <strong id="record-juego">–</strong></span>
         <span>Tiempo: <strong id="tiempo">0:00</strong></span>
@@ -29,14 +32,15 @@
       </header>
       <p id="aviso-record" class="aviso-record"></p>
       <canvas id="tablero" width="600" height="600"></canvas>
-       <p class="ayuda">Usa las flechas o WASD para dirigir la conga</p>
+      <p class="ayuda">Usa las flechas o WASD para dirigir la conga</p>
     </section>
-    <!-- Pantalla de Game Over -->
-        <section id="pantalla-gameover" class="pantalla" hidden>
+
+    <!-- Pantalla de game over: resultado y ranking -->
+    <section id="pantalla-gameover" class="pantalla" hidden>
       <h2>GAME OVER</h2>
       <p>Esta partida: <strong id="puntos-final">0</strong></p>
       <p>Tu récord: <strong id="record-final">–</strong></p>
-            <p>Tiempo: <strong id="tiempo-final">0:00</strong></p>
+      <p>Tiempo: <strong id="tiempo-final">0:00</strong></p>
       <p id="mensaje-record" class="aviso-record"></p>
       <p id="aviso-guardado" class="error" hidden></p>
 
@@ -49,8 +53,9 @@
         <button id="btn-cambiar-nombre" type="button">Cambiar nombre</button>
       </div>
     </section>
-      </main>
+  </main>
 
+  <!-- Scripts: el orden importa, main.js usa lo que definen los anteriores -->
   <script src="js/storage.js" defer></script>
   <script src="js/api.js" defer></script>
   <script src="js/game.js" defer></script>

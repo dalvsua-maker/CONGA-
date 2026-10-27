@@ -1,23 +1,43 @@
-:root {
-  --fondo: #14001f;
-  --panel: #230038;
-  --rosa: #ff2fb3;
-  --cian: #25f4ee;
-  --amarillo: #ffe14d;
-  --texto: #f5ecff;
-  --error: #ff6b6b;
+/* Fuentes */
+@font-face {
+  font-family: "Shrikhand";
+  src: url("../fonts/shrikhand.woff2") format("woff2");
+  font-display: swap;
 }
 
+@font-face {
+  font-family: "Rubik";
+  src: url("../fonts/rubik.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+/* Paleta */
+:root {
+  --fondo: #1a0b1f;
+  --panel: #2a1433;
+  --crema: #fff4e0;
+  --naranja: #ff7a1a;
+  --mostaza: #ffc23d;
+  --magenta: #e8338a;
+  --violeta: #7b3fe4;
+  --turquesa: #1fb5a8;
+  --error: #ff9a8a;
+  --titulo: "Shrikhand", "Trebuchet MS", cursive;
+  --texto: "Rubik", "Trebuchet MS", Arial, sans-serif;
+}
+
+/* Base */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #3a0a5c, var(--fondo) 60%);
-  color: var(--texto);
-  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: radial-gradient(circle at 50% -10%, #4a1a4f 0, transparent 55%),
+    var(--fondo);
+  color: var(--crema);
+  font-family: var(--texto);
 }
 
 main {
@@ -28,38 +48,60 @@ main {
   padding: 1rem;
 }
 
+/* Pantallas */
 .pantalla {
+  position: relative;
   width: 100%;
   max-width: 640px;
+  overflow: hidden;
   text-align: center;
   background: var(--panel);
-  border: 2px solid var(--rosa);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 0 24px rgba(255, 47, 179, 0.5);
+  border-radius: 24px;
+  padding: 2.5rem 1.5rem 1.5rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 
-.pantalla[hidden] {
-  display: none;
+/* Franja de colores de los años 70 en la parte de arriba */
+.pantalla::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(
+    to right,
+    var(--naranja) 0 25%,
+    var(--mostaza) 25% 50%,
+    var(--magenta) 50% 75%,
+    var(--violeta) 75% 100%
+  );
 }
 
+/* Títulos */
 h1 {
   margin: 0 0 1rem;
-  font-size: 2.6rem;
-  color: var(--amarillo);
-  text-shadow: 0 0 12px var(--rosa);
+  font-family: var(--titulo);
+  font-weight: normal;
+  font-size: 3rem;
+  color: var(--mostaza);
+  text-shadow: 3px 3px 0 var(--magenta);
 }
 
 h2 {
-  color: var(--rosa);
-  font-size: 2.2rem;
   margin-top: 0;
+  font-family: var(--titulo);
+  font-weight: normal;
+  font-size: 2.4rem;
+  color: var(--naranja);
+  text-shadow: 3px 3px 0 var(--violeta);
 }
 
 h3 {
-  color: var(--cian);
+  color: var(--turquesa);
 }
 
+/* Formulario y botones */
 form {
   display: flex;
   flex-direction: column;
@@ -71,32 +113,44 @@ input {
   width: 100%;
   max-width: 280px;
   padding: 0.6rem 0.8rem;
-  font-size: 1.1rem;
+  font: 500 1.1rem var(--texto);
   text-align: center;
-  color: var(--texto);
+  color: var(--crema);
   background: var(--fondo);
-  border: 2px solid var(--cian);
-  border-radius: 8px;
+  border: 2px solid var(--turquesa);
+  border-radius: 999px;
 }
 
 input:focus {
   outline: none;
-  box-shadow: 0 0 10px var(--cian);
+  box-shadow: 0 0 0 4px rgba(31, 181, 168, 0.35);
 }
 
 button {
-  padding: 0.7rem 1.4rem;
-  font-size: 1.1rem;
-  font-weight: bold;
+  padding: 0.7rem 1.6rem;
+  font: 700 1.1rem var(--texto);
   color: var(--fondo);
-  background: var(--amarillo);
+  background: var(--mostaza);
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
+  box-shadow: 0 5px 0 #b86e00;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
 }
 
 button:hover {
-  background: var(--cian);
+  background: #ffd36e;
+}
+
+/* Al pulsar, el botón "se hunde" */
+button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b86e00;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--turquesa);
+  outline-offset: 3px;
 }
 
 .botones {
@@ -111,31 +165,44 @@ button:hover {
   color: var(--error);
   margin: 0;
 }
+
+/* Pantalla de juego */
 .marcador {
   display: flex;
   justify-content: space-between;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin-bottom: 0.8rem;
-  color: var(--cian);  
   gap: 0.5rem;
   flex-wrap: wrap;
 }
 
+.marcador strong {
+  color: var(--mostaza);
+}
+
+/* El suelo de la pista: damero de 20x20 casillas dibujado con CSS
+   (el canvas es transparente, así que se ve lo que hay detrás) */
 #tablero {
   width: 100%;
   max-width: 600px;
-  aspect-ratio: 1 / 1;
-  background: #0b0014;
-  border: 3px solid var(--cian);
-  border-radius: 8px;
-  box-shadow: 0 0 18px rgba(37, 244, 238, 0.5);
+  background: conic-gradient(
+    #3a1b47 25%,
+    #2a1433 0 50%,
+    #3a1b47 0 75%,
+    #2a1433 0
+  );
+  background-size: 10% 10%;
+  border: 4px solid var(--mostaza);
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px var(--magenta);
 }
 
 .ayuda {
-  color: #b9a4d0;
+  color: #d9c6e0;
   font-size: 0.95rem;
 }
 
+/* Pantalla de game over */
 #lista-ranking {
   max-width: 320px;
   margin: 0.5rem auto;
@@ -148,19 +215,20 @@ button:hover {
 }
 
 #lista-ranking li.propio {
-  color: var(--amarillo);
+  color: var(--mostaza);
   font-weight: bold;
 }
+
 .icono {
   width: 1em;
   height: 1em;
   vertical-align: -0.12em;
 }
+
 .aviso-record {
   margin: 0.4rem 0;
-  color: var(--amarillo);
+  color: var(--mostaza);
   font-weight: bold;
-  text-shadow: 0 0 10px var(--rosa);
 }
 
 #aviso-record {
