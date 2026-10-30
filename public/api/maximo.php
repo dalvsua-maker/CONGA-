@@ -5,25 +5,21 @@
  * Devuelve la mejor puntuación del jugador (0 si todavía no ha jugado).
  */
 
-require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../src/BaseDeDatos.php';
 require_once __DIR__ . '/../../src/Validador.php';
 require_once __DIR__ . '/../../src/Respuesta.php';
 
 /* El nombre llega por la URL y se valida igual que al guardar */
-$nombre = Validador::nombre($_GET['name'] ?? null);
-if ($nombre === null) {
-    Respuesta::json(400, ['ok' => false, 'error' => 'NOMBRE_INVALIDO']);
-}
+$nombre = Respuesta::exigir(Validador::nombre($_GET['name'] ?? null), 'NOMBRE_INVALIDO');
 
 /* Ordenado por score descendente, el primero es su mejor partida */
 try {
-    $mejor = Database::scores()->findOne(
+    $mejor = BaseDeDatos::puntuaciones()->findOne(
         ['nameKey' => Validador::claveNombre($nombre)],
         ['sort' => ['score' => -1], 'projection' => ['_id' => 0, 'score' => 1]]
     );
 } catch (Throwable $e) {
-    error_log('maximo: ' . $e->getMessage());
-    Respuesta::json(503, ['ok' => false, 'error' => 'BD_NO_DISPONIBLE']);
+    Respuesta::baseDeDatosNoDisponible('maximo', $e);
 }
 
 $maximo = $mejor === null ? 0 : $mejor['score'];

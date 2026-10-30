@@ -38,11 +38,7 @@ class Validador
      */
     public static function puntuacion(mixed $valor): ?int
     {
-        if (!is_int($valor) || $valor < 0 || $valor > self::MAX_PUNTUACION) {
-            return null;
-        }
-
-        return $valor;
+        return self::enteroDe0A($valor, self::MAX_PUNTUACION);
     }
 
     /**
@@ -53,7 +49,19 @@ class Validador
      */
     public static function duracion(mixed $valor): ?int
     {
-        if (!is_int($valor) || $valor < 0 || $valor > self::MAX_DURACION) {
+        return self::enteroDe0A($valor, self::MAX_DURACION);
+    }
+
+    /**
+     * Entero entre 0 y el máximo; lo comparten puntuacion() y duracion().
+     *
+     * @param mixed $valor
+     * @param int   $maximo
+     * @return int|null
+     */
+    private static function enteroDe0A(mixed $valor, int $maximo): ?int
+    {
+        if (!is_int($valor) || $valor < 0 || $valor > $maximo) {
             return null;
         }
 

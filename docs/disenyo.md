@@ -43,7 +43,7 @@ Conga/
 │       └── maximo.php
 └── src/                      # PHP interno, fuera del alcance del navegador
     ├── config.php            # lee .env
-    ├── Database.php          # conexión a Atlas
+    ├── BaseDeDatos.php       # conexión a Atlas
     ├── Validador.php         # reglas de nombre, puntuación y duración
     └── Respuesta.php         # respuestas JSON con código HTTP
 ```

@@ -5,28 +5,28 @@ use MongoDB\Collection;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-/** La única clase que habla con Atlas: el resto pide la colección con Database::scores() */
-class Database
+/** La única clase que habla con Atlas: el resto pide la colección con BaseDeDatos::puntuaciones() */
+class BaseDeDatos
 {
     /** Cliente de Mongo, null hasta que se conecta */
-    private static ?Client $client = null;
+    private static ?Client $cliente = null;
 
     /** Nombre de la base de datos */
-    private static string $dbName = '';
+    private static string $nombreBd = '';
 
     /** Crea el cliente la primera vez que hace falta (la conexión real ocurre en la primera consulta) */
-    private static function connect(): void
+    private static function conectar(): void
     {
-        if (self::$client !== null) {
+        if (self::$cliente !== null) {
             return;
         }
 
         $config = require __DIR__ . '/config.php';
 
-        self::$client = new Client($config['uri'], [
+        self::$cliente = new Client($config['uri'], [
             'serverSelectionTimeoutMS' => 5000,
         ]);
-        self::$dbName = $config['db'];
+        self::$nombreBd = $config['db'];
     }
 
     /**
@@ -34,10 +34,10 @@ class Database
      *
      * @return Collection
      */
-    public static function scores(): Collection
+    public static function puntuaciones(): Collection
     {
-        self::connect();
+        self::conectar();
 
-        return self::$client->selectCollection(self::$dbName, 'scores');
+        return self::$cliente->selectCollection(self::$nombreBd, 'scores');
     }
 }

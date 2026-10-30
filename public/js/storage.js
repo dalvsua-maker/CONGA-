@@ -1,7 +1,7 @@
 /** Guarda el nombre del jugador en localStorage para no pedirlo cada vez */
 
 /** Clave de localStorage donde se guarda el nombre */
-const CLAVE_NOMBRE = 'conga_nombre';
+const CLAVE_NOMBRE = "conga_nombre";
 
 /**
  * Devuelve el nombre guardado, o '' si no hay (o si localStorage falla).
@@ -10,9 +10,9 @@ const CLAVE_NOMBRE = 'conga_nombre';
  */
 function obtenerNombre() {
   try {
-    return localStorage.getItem(CLAVE_NOMBRE) || '';
+    return localStorage.getItem(CLAVE_NOMBRE) || "";
   } catch {
-    return '';
+    return "";
   }
 }
 

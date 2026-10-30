@@ -5,7 +5,7 @@
  * Devuelve el top 10 con una fila por jugador (su mejor partida).
  */
 
-require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../src/BaseDeDatos.php';
 require_once __DIR__ . '/../../src/Respuesta.php';
 
 /* Se ordena, se agrupa por jugador, se vuelve a ordenar (al agrupar se pierde
@@ -26,15 +26,14 @@ $pipeline = [
 try {
     $ranking = [];
 
-    foreach (Database::scores()->aggregate($pipeline) as $fila) {
+    foreach (BaseDeDatos::puntuaciones()->aggregate($pipeline) as $fila) {
         $ranking[] = [
             'name'  => $fila['name'],
             'score' => $fila['score'],
         ];
     }
 } catch (Throwable $e) {
-    error_log('ranking: ' . $e->getMessage());
-    Respuesta::json(503, ['ok' => false, 'error' => 'BD_NO_DISPONIBLE']);
+    Respuesta::baseDeDatosNoDisponible('ranking', $e);
 }
 
 Respuesta::json(200, ['ok' => true, 'ranking' => $ranking]);

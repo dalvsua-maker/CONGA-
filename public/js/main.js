@@ -1,29 +1,39 @@
 /** Controla las pantallas y conecta el juego (game.js) con el servidor (api.js) */
 
 /* Elementos del DOM */
-const pantallas = document.querySelectorAll('.pantalla');
-const formNombre = document.getElementById('form-nombre');
-const inputNombre = document.getElementById('input-nombre');
-const errorNombre = document.getElementById('error-nombre');
-const recordInicio = document.getElementById('record-inicio');
-const jugadorJuego = document.getElementById('jugador-juego');
-const puntosJuego = document.getElementById('puntos');
-const tablero = document.getElementById('tablero');
-const puntosFinal = document.getElementById('puntos-final');
-const recordFinal = document.getElementById('record-final');
-const avisoGuardado = document.getElementById('aviso-guardado');
-const listaRanking = document.getElementById('lista-ranking');
-const avisoRanking = document.getElementById('aviso-ranking');
-const recordJuego = document.getElementById('record-juego');
-const tiempoJuego = document.getElementById('tiempo');
-const avisoRecord = document.getElementById('aviso-record');
-const tiempoFinal = document.getElementById('tiempo-final');
-const mensajeRecord = document.getElementById('mensaje-record');
+const pantallas = document.querySelectorAll(".pantalla");
+const MENSAJE_NOMBRE_INVALIDO =
+  "El nombre debe tener entre 3 y 15 caracteres: solo letras, números y espacios.";
+const ui = {
+  inicio: {
+    formulario: document.getElementById("form-nombre"),
+    input: document.getElementById("input-nombre"),
+    error: document.getElementById("error-nombre"),
+    record: document.getElementById("record-inicio"),
+  },
+  juego: {
+    jugador: document.getElementById("jugador-juego"),
+    record: document.getElementById("record-juego"),
+    tiempo: document.getElementById("tiempo-juego"),
+    puntos: document.getElementById("puntos-juego"),
+    avisoRecord: document.getElementById("aviso-record-juego"),
+    tablero: document.getElementById("tablero"),
+  },
+  final: {
+    puntos: document.getElementById("puntos-final"),
+    record: document.getElementById("record-final"),
+    tiempo: document.getElementById("tiempo-final"),
+    avisoRecord: document.getElementById("aviso-record-final"),
+    avisoGuardado: document.getElementById("aviso-guardado"),
+    ranking: document.getElementById("lista-ranking"),
+    avisoRanking: document.getElementById("aviso-ranking"),
+  },
+};
 
-/* Estado de la partida; recordPrevio es null hasta que llega el récord del servidor */
-let recordPrevio = null;
-let recordSuperado = false;
-let nombreActual = '';
+/* Estado de la partida; recordAlEmpezar es null hasta que llega el récord del servidor */
+let recordAlEmpezar = null;
+let haSuperadoRecord = false;
+let nombreJugador = "";
 
 /**
  * Muestra una pantalla y oculta las demás.
@@ -43,10 +53,28 @@ function mostrarPantalla(id) {
  * @param {string} texto
  * @returns {string|null} El nombre limpio, o null si no vale.
  */
-function validarNombre(texto) {
+function extraerNombreValido(texto) {
   const nombre = texto.trim();
   const valido = /^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ ]{3,15}$/.test(nombre);
   return valido ? nombre : null;
+}
+
+/**
+ * Pide el récord de un jugador y lo escribe en el elemento. Si falla escribe "–".
+ *
+ * @param {HTMLElement} elemento Donde se muestra el récord.
+ * @param {string} nombre
+ * @returns {Promise<number|null>} El récord, o null si no se pudo pedir.
+ */
+async function mostrarRecord(elemento, nombre) {
+  try {
+    const record = await obtenerMaximo(nombre);
+    elemento.textContent = record;
+    return record;
+  } catch {
+    elemento.textContent = "–";
+    return null;
+  }
 }
 
 /**
@@ -56,16 +84,12 @@ function validarNombre(texto) {
  */
 async function cargarRecordInicio(nombre) {
   if (!nombre) {
-    recordInicio.textContent = '0';
+    ui.inicio.record.textContent = "0";
     return;
   }
 
-  recordInicio.textContent = '…';
-  try {
-    recordInicio.textContent = await obtenerMaximo(nombre);
-  } catch {
-    recordInicio.textContent = '–';
-  }
+  ui.inicio.record.textContent = "…";
+  await mostrarRecord(ui.inicio.record, nombre);
 }
 
 /**
@@ -76,71 +100,132 @@ async function cargarRecordInicio(nombre) {
  */
 function formatearTiempo(segundos) {
   const minutos = Math.floor(segundos / 60);
-  const resto = String(segundos % 60).padStart(2, '0');
+  const resto = String(segundos % 60).padStart(2, "0");
   return `${minutos}:${resto}`;
 }
 
 /** Pide el récord al empezar para poder avisar cuando se supere */
 async function cargarRecordJuego() {
-  try {
-    recordPrevio = await obtenerMaximo(nombreActual);
-    recordJuego.textContent = recordPrevio;
-  } catch {
-    recordJuego.textContent = '–';
-  }
+  recordAlEmpezar = await mostrarRecord(ui.juego.record, nombreJugador);
 }
 
-/** Deja la pantalla de juego a cero y arranca una partida nueva */
-function empezarPartida() {
-  jugadorJuego.textContent = nombreActual;
-  puntosJuego.textContent = '0';
-  tiempoJuego.textContent = '0:00';
-  avisoRecord.textContent = '';
-  recordJuego.textContent = '…';
-  recordPrevio = null;
-  recordSuperado = false;
+/**
+ * La llama Juego cada vez que cambia el segundo del cronómetro.
+ *
+ * @param {number} segundos
+ */
+function alCambiarTiempo(segundos) {
+  ui.juego.tiempo.textContent = formatearTiempo(segundos);
+}
 
-  mostrarPantalla('pantalla-juego');
+/** Deja la pantalla de juego a cero, sin avisos, y la muestra */
+function prepararPantallaJuego() {
+  ui.juego.jugador.textContent = nombreJugador;
+  ui.juego.puntos.textContent = "0";
+  ui.juego.tiempo.textContent = "0:00";
+  ui.juego.avisoRecord.textContent = "";
+  ui.juego.record.textContent = "…";
+  mostrarPantalla("pantalla-juego");
+}
+
+/** Empieza una partida nueva: reinicia el estado, arranca el juego y pide el récord */
+function empezarPartida() {
+  recordAlEmpezar = null;
+  haSuperadoRecord = false;
+
+  prepararPantallaJuego();
   juego.iniciar();
   cargarRecordJuego();
 }
 
 /**
- * La llama Juego al comer una bola. Actualiza el marcador y avisa si se supera
- * el récord (en la primera partida no se avisa).
+ * Dice si estos puntos superan el récord con el que se empezó la partida.
+ *
+ * @param {number} puntos
+ * @returns {boolean}
+ */
+function superaElRecord(puntos) {
+  return recordAlEmpezar !== null && puntos > recordAlEmpezar;
+}
+
+/** Marca el récord como superado y lo avisa en la pantalla de juego */
+function avisarNuevoRecord() {
+  haSuperadoRecord = true;
+  ui.juego.avisoRecord.textContent = "¡Nuevo récord!";
+}
+
+/**
+ * La llama Juego al comer una bola. Actualiza el marcador y el récord, y avisa
+ * si se supera (en la primera partida no se avisa).
  *
  * @param {number} puntos
  */
 function alCambiarPuntos(puntos) {
-  puntosJuego.textContent = puntos;
+  ui.juego.puntos.textContent = puntos;
 
-  if (recordPrevio !== null && puntos > recordPrevio) {
-    recordJuego.textContent = puntos;
+  if (!superaElRecord(puntos)) {
+    return;
+  }
 
-    if (recordPrevio > 0) {
-      recordSuperado = true;
-      avisoRecord.textContent = '¡Nuevo récord!';
-    }
+  ui.juego.record.textContent = puntos;
+  if (recordAlEmpezar > 0) {
+    avisarNuevoRecord();
   }
 }
 
 /** Al enviar el nombre: lo valida, lo guarda y empieza la partida */
-formNombre.addEventListener('submit', (evento) => {
+function alEnviarNombre(evento) {
   evento.preventDefault();
 
-  const nombre = validarNombre(inputNombre.value);
+  const nombre = extraerNombreValido(ui.inicio.input.value);
   if (nombre === null) {
-    errorNombre.textContent =
-      'El nombre debe tener entre 3 y 15 caracteres: solo letras, números y espacios.';
-    errorNombre.hidden = false;
+    ui.inicio.error.textContent = MENSAJE_NOMBRE_INVALIDO;
+    ui.inicio.error.hidden = false;
     return;
   }
 
-  errorNombre.hidden = true;
-  nombreActual = nombre;
+  ui.inicio.error.hidden = true;
+  nombreJugador = nombre;
   guardarNombre(nombre);
   empezarPartida();
-});
+}
+
+/**
+ * Rellena la pantalla de game over con esta partida, vacía lo que se pide
+ * al servidor y la muestra.
+ *
+ * @param {number} puntos
+ * @param {number} segundos
+ */
+function prepararPantallaFinal(puntos, segundos) {
+  ui.final.puntos.textContent = puntos;
+  ui.final.tiempo.textContent = formatearTiempo(segundos);
+  ui.final.avisoRecord.textContent = "";
+  ui.final.record.textContent = "…";
+  ui.final.ranking.replaceChildren();
+  ui.final.avisoGuardado.hidden = true;
+  ui.final.avisoRanking.hidden = true;
+  mostrarPantalla("pantalla-gameover");
+}
+
+/**
+ * Guarda la puntuación en el servidor. Si sale bien y se ha superado el
+ * récord, lo felicita; si falla, enseña un aviso.
+ *
+ * @param {number} puntos
+ * @param {number} segundos
+ */
+async function guardarResultado(puntos, segundos) {
+  try {
+    await guardarPuntuacion(nombreJugador, puntos, segundos);
+    if (haSuperadoRecord) {
+      ui.final.avisoRecord.textContent = "¡Has superado tu récord!";
+    }
+  } catch {
+    ui.final.avisoGuardado.textContent = "No se pudo guardar tu puntuación.";
+    ui.final.avisoGuardado.hidden = false;
+  }
+}
 
 /**
  * La llama Juego al terminar. Guarda la puntuación y después carga el ranking
@@ -150,27 +235,11 @@ formNombre.addEventListener('submit', (evento) => {
  * @param {number} segundos
  */
 async function alTerminar(puntos, segundos) {
-  puntosFinal.textContent = puntos;
-  tiempoFinal.textContent = formatearTiempo(segundos);
-  mensajeRecord.textContent = '';
-  recordFinal.textContent = '…';
-  listaRanking.replaceChildren();
-  avisoGuardado.hidden = true;
-  avisoRanking.hidden = true;
-  mostrarPantalla('pantalla-gameover');
-
-  try {
-    await guardarPuntuacion(nombreActual, puntos, segundos);
-    if (recordSuperado) {
-      mensajeRecord.textContent = '¡Has superado tu récord!';
-    }
-  } catch {
-    avisoGuardado.textContent = 'No se pudo guardar tu puntuación.';
-    avisoGuardado.hidden = false;
-  }
+  prepararPantallaFinal(puntos, segundos);
+  await guardarResultado(puntos, segundos);
 
   cargarRanking();
-  cargarRecordFinal();
+  mostrarRecord(ui.final.record, nombreJugador);
 }
 
 /** Pide el top 10 y lo pinta; si falla, enseña un aviso */
@@ -179,8 +248,8 @@ async function cargarRanking() {
     const ranking = await obtenerRanking();
     pintarRanking(ranking);
   } catch {
-    avisoRanking.textContent = 'No se pudo cargar el ranking.';
-    avisoRanking.hidden = false;
+    ui.final.avisoRanking.textContent = "No se pudo cargar el ranking.";
+    ui.final.avisoRanking.hidden = false;
   }
 }
 
@@ -190,50 +259,50 @@ async function cargarRanking() {
  * @param {Array<{name: string, score: number}>} ranking
  */
 function pintarRanking(ranking) {
-  listaRanking.replaceChildren();
+  ui.final.ranking.replaceChildren();
 
   ranking.forEach((fila) => {
-    const elemento = document.createElement('li');
+    const elemento = document.createElement("li");
     elemento.textContent = `${fila.name} — ${fila.score}`;
 
-    if (fila.name.toLowerCase() === nombreActual.toLowerCase()) {
-      elemento.classList.add('propio');
+    if (fila.name.toLowerCase() === nombreJugador.toLowerCase()) {
+      elemento.classList.add("propio");
     }
-    listaRanking.appendChild(elemento);
+    ui.final.ranking.appendChild(elemento);
   });
 }
 
-/** Rellena el récord de la pantalla de game over */
-async function cargarRecordFinal() {
-  try {
-    recordFinal.textContent = await obtenerMaximo(nombreActual);
-  } catch {
-    recordFinal.textContent = '–';
-  }
+/** Al salir del campo del nombre: enseña el récord de ese nombre */
+function alEscribirNombre() {
+  cargarRecordInicio(extraerNombreValido(ui.inicio.input.value));
 }
 
-/* Botones */
-document.getElementById('btn-otra-vez').addEventListener('click', empezarPartida);
+/** Vuelve a la pantalla de inicio para poder escribir otro nombre */
+function alCambiarNombre() {
+  mostrarPantalla("pantalla-inicio");
+  ui.inicio.input.focus();
+  cargarRecordInicio(nombreJugador);
+}
 
-document.getElementById('btn-cambiar-nombre').addEventListener('click', () => {
-  mostrarPantalla('pantalla-inicio');
-  inputNombre.focus();
-  cargarRecordInicio(nombreActual);
-});
-
-inputNombre.addEventListener('change', () => {
-  cargarRecordInicio(validarNombre(inputNombre.value));
-});
+/* Eventos */
+ui.inicio.formulario.addEventListener("submit", alEnviarNombre);
+ui.inicio.input.addEventListener("change", alEscribirNombre);
+document
+  .getElementById("btn-otra-vez")
+  .addEventListener("click", empezarPartida);
+document
+  .getElementById("btn-cambiar-nombre")
+  .addEventListener("click", alCambiarNombre);
 
 /* Arranque */
 const juego = new Juego(
-  tablero,
+  ui.juego.tablero,
   alCambiarPuntos,
   alTerminar,
-  (segundos) => { tiempoJuego.textContent = formatearTiempo(segundos); }
+  alCambiarTiempo,
 );
 
-nombreActual = validarNombre(obtenerNombre()) || '';
-inputNombre.value = nombreActual;
-cargarRecordInicio(nombreActual);
-mostrarPantalla('pantalla-inicio');
+nombreJugador = extraerNombreValido(obtenerNombre()) || "";
+ui.inicio.input.value = nombreJugador;
+cargarRecordInicio(nombreJugador);
+mostrarPantalla("pantalla-inicio");
