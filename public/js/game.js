@@ -12,6 +12,8 @@ const LARGO_INICIAL = 3;
 const MAX_DIRECCIONES_EN_COLA = 3;
 /** Desde este retraso se descartan los pasos atrasados (pestaña en segundo plano) */
 const RETRASO_MAXIMO_MS = MS_POR_PASO * 3;
+/** Parte del paso (de 0 a 1) en la que la gente acaba de girarse hacia su nueva dirección */
+const FRACCION_GIRO = 0.5;
 
 /** Teclas de movimiento (flechas y WASD) y la dirección de cada una */
 const DIRECCION_POR_TECLA = {
@@ -80,6 +82,37 @@ function interpolar(desde, hasta, progreso) {
 }
 
 /**
+ * Ángulo hacia el que apunta una dirección. Las imágenes están dibujadas
+ * mirando a la derecha, que es el ángulo 0.
+ *
+ * @param {{x: number, y: number}} direccion
+ * @returns {number} Radianes.
+ */
+function anguloDeDireccion(direccion) {
+  return Math.atan2(direccion.y, direccion.x);
+}
+
+/**
+ * Ángulo entre dos ángulos yendo por el camino corto, para que un giro de 90
+ * grados no dé la vuelta larga.
+ *
+ * @param {number} desde Radianes.
+ * @param {number} hasta Radianes.
+ * @param {number} progreso Entre 0 y 1.
+ * @returns {number}
+ */
+function interpolarAngulo(desde, hasta, progreso) {
+  let diferencia = hasta - desde;
+  while (diferencia > Math.PI) {
+    diferencia -= 2 * Math.PI;
+  }
+  while (diferencia <= -Math.PI) {
+    diferencia += 2 * Math.PI;
+  }
+  return desde + diferencia * progreso;
+}
+
+/**
  * Crea una imagen y empieza a cargarla.
  *
  * @param {string} ruta
@@ -137,6 +170,8 @@ class Juego {
     this.inicioPasoMs = 0;
 
     this.direccion = DIRECCION_INICIAL;
+    // La del paso anterior: con ella se anima el giro de la cabeza
+    this.direccionAnterior = DIRECCION_INICIAL;
     this.colaDirecciones = [];
     this.puntos = 0;
     this.enMarcha = false;
@@ -366,6 +401,7 @@ class Juego {
 
   /** Si hay un giro esperando en la cola, la conga lo toma; uno por paso */
   aplicarSiguienteGiro() {
+    this.direccionAnterior = this.direccion;
     if (this.colaDirecciones.length > 0) {
       this.direccion = this.colaDirecciones.shift();
     }
@@ -440,7 +476,8 @@ class Juego {
 
   /**
    * Borra el canvas y dibuja la bola y la conga. Cada persona se pinta entre su
-   * casilla anterior y la actual según lo avanzado del paso.
+   * casilla anterior y la actual según lo avanzado del paso, y girada hacia
+   * donde mira.
    *
    * @param {number} horaFotogramaMs Hora del fotograma; sin ella se pinta al
    * principio del paso actual.
@@ -452,16 +489,66 @@ class Juego {
     }
 
     const progreso = this.progresoDelPaso(horaFotogramaMs);
+    // El giro acaba antes que el paso, así que se nota más rápido
+    const progresoGiro = Math.min(progreso / FRACCION_GIRO, 1);
     this.congaActual.forEach((persona, indice) => {
       const anterior = this.casillaAnteriorDe(indice);
       const posicion = interpolar(anterior, persona, progreso);
+      const angulo = this.anguloDe(indice, progresoGiro);
 
       if (indice === 0) {
-        this.dibujarEnPosicion(IMG_CABEZA, posicion, COLOR_CABEZA);
+        this.dibujarEnPosicion(IMG_CABEZA, posicion, COLOR_CABEZA, angulo);
       } else {
-        this.dibujarEnPosicion(IMG_PERSONA, posicion, COLOR_PERSONA);
+        this.dibujarEnPosicion(IMG_PERSONA, posicion, COLOR_PERSONA, angulo);
       }
     });
+  }
+
+  /**
+   * Hacia dónde mira una persona de una conga: la cabeza, hacia donde va; las
+   * demás, hacia la persona que tienen delante.
+   *
+   * @param {number} indice
+   * @param {Array<{x: number, y: number}>} conga
+   * @param {{x: number, y: number}} direccionCabeza
+   * @returns {{x: number, y: number}}
+   */
+  haciaDondeMira(indice, conga, direccionCabeza) {
+    if (indice === 0) {
+      return direccionCabeza;
+    }
+    const delante = conga[indice - 1];
+    const persona = conga[indice];
+    return { x: delante.x - persona.x, y: delante.y - persona.y };
+  }
+
+  /**
+   * Ángulo con el que se dibuja una persona: va girando desde hacia donde
+   * miraba en el paso anterior hasta hacia donde mira ahora. Una persona que
+   * acaba de unirse no tiene paso anterior y se pinta ya girada del todo.
+   *
+   * @param {number} indice
+   * @param {number} progresoGiro Entre 0 y 1.
+   * @returns {number} Radianes.
+   */
+  anguloDe(indice, progresoGiro) {
+    const direccionActual = this.haciaDondeMira(
+      indice,
+      this.congaActual,
+      this.direccion,
+    );
+    const hasta = anguloDeDireccion(direccionActual);
+
+    if (indice >= this.congaAnterior.length) {
+      return hasta;
+    }
+    const direccionPrevia = this.haciaDondeMira(
+      indice,
+      this.congaAnterior,
+      this.direccionAnterior,
+    );
+    const desde = anguloDeDireccion(direccionPrevia);
+    return interpolarAngulo(desde, hasta, progresoGiro);
   }
 
   /**
@@ -494,33 +581,41 @@ class Juego {
 
   /**
    * Dibuja una imagen en una posición, o un cuadrado de color si todavía no ha
-   * cargado. La posición va en casillas y puede llevar decimales.
+   * cargado. La posición va en casillas y puede llevar decimales. El canvas se
+   * gira sobre el centro de la casilla y luego se deja como estaba.
    *
    * @param {HTMLImageElement} imagen
    * @param {{x: number, y: number}} posicion
    * @param {string} colorRespaldo
+   * @param {number} [angulo] Radianes; 0 es mirando a la derecha.
    */
-  dibujarEnPosicion(imagen, posicion, colorRespaldo) {
-    const pixelX = posicion.x * TAMANO_CASILLA;
-    const pixelY = posicion.y * TAMANO_CASILLA;
+  dibujarEnPosicion(imagen, posicion, colorRespaldo, angulo = 0) {
+    const mitad = TAMANO_CASILLA / 2;
+    const centroX = posicion.x * TAMANO_CASILLA + mitad;
+    const centroY = posicion.y * TAMANO_CASILLA + mitad;
+
+    this.contexto.save();
+    this.contexto.translate(centroX, centroY);
+    this.contexto.rotate(angulo);
 
     if (imagen.complete && imagen.naturalWidth > 0) {
       this.contexto.drawImage(
         imagen,
-        pixelX,
-        pixelY,
+        -mitad,
+        -mitad,
         TAMANO_CASILLA,
         TAMANO_CASILLA,
       );
     } else {
       this.contexto.fillStyle = colorRespaldo;
       this.contexto.fillRect(
-        pixelX + 2,
-        pixelY + 2,
+        2 - mitad,
+        2 - mitad,
         TAMANO_CASILLA - 4,
         TAMANO_CASILLA - 4,
       );
     }
+    this.contexto.restore();
   }
 
   /** Cierra la partida y avisa con los puntos y los segundos */
